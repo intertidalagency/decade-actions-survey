@@ -1,2 +1,2 @@
 # decade-actions-survey
-Ocean Decade Data Coordination Group’s survey of Decade Actions
+Code to analyze the Ocean Decade Data Coordination Group’s survey of Decade Actions
