@@ -1,0 +1,52 @@
+---
+title: "Survey Data EDA"
+output: html_document
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+library(tidyverse)
+
+source("survey_data_cleaning.R")
+# use qsdf dataframe
+```
+
+How well was each Decade Challenge represented in survey responses? 
+```{r decade challenge, echo=FALSE}
+dc <- ggplot(data = qsdf) + geom_bar(aes(decade_challenge)) +
+      xlab("Decade Challenge") + ylab("count of responses") + theme_classic() +
+      scale_x_discrete(limits = c("Challenge 1: Marine Pollution", 
+                                  "Challenge 2: Protect and Restore Ecosystems",
+                                  "Challenge 3: Sustainable Blue Food",
+                                  "Challenge 4: Sustainable Ocean Economy",          
+                                  "Challenge 5: Ocean-Climate Nexus",
+                                  "Challenge 6: Community Resilience",
+                                  "Challenge 7: Ocean Observations",
+                                  "Challenge 8: Digital Representation of the Ocean",
+                                  "Challenge 9: Capacity Development",
+                                  "Challenge 10: Behavior Change")) +
+      theme(axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1))
+  
+dc
+```
+
+```{r , echo=FALSE}
+new_old_data <- ggplot(data = qsdf) + 
+                geom_jitter(aes(collect_new_data, use_existing_data, 
+                                color = decade_challenge), width = 0.25, height = 0.25) +
+                theme_bw() + 
+                scale_color_viridis_d("Decade Challenge",
+                                      limits = c("Challenge 1: Marine Pollution", 
+                                                 "Challenge 2: Protect and Restore Ecosystems",
+                                                 "Challenge 3: Sustainable Blue Food",
+                                                 "Challenge 4: Sustainable Ocean Economy",          
+                                                 "Challenge 5: Ocean-Climate Nexus",
+                                                 "Challenge 6: Community Resilience",
+                                                 "Challenge 7: Ocean Observations",
+                                                 "Challenge 8: Digital Representation of the Ocean",
+                                                 "Challenge 9: Capacity Development",
+                                                 "Challenge 10: Behavior Change"))
+
+new_old_data
+```
+
