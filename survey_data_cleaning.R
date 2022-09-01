@@ -61,17 +61,69 @@ qsdf <- sdf %>%
               na.rm = TRUE, remove = TRUE) %>% 
         unite("use_existing_data", use_existing_data_yes:use_existing_data_no,
               na.rm = TRUE, remove = TRUE)
+### 
 
+# data subject dataframe
+ds_df <- qsdf %>% 
+         # select the columns I want to transform
+         select(decade_challenge, data_subj_phys_oc:data_subj_conserv) %>% 
+         rowid_to_column() %>% # make a unique id column
+         # make long dataframe
+         pivot_longer(cols = data_subj_phys_oc:data_subj_conserv, names_to = "col_name", 
+                      values_to = "data_subject") %>% 
+         select(-col_name) %>%
+         drop_na() # remove rows with an NA in them
 
 ### 
 
+# data sharing dataframe
+sh_df <- qsdf %>% 
+         # select the columns I want to transform
+         select(decade_challenge, public_repo_no_registration:want_advice_sharing) %>% 
+         rowid_to_column() %>% # make a unique id column
+         # make long dataframe
+         pivot_longer(cols = public_repo_no_registration:want_advice_sharing, 
+                      names_to = "col_name", values_to = "sharing") %>% 
+         select(-col_name) %>%
+         drop_na() %>% # remove rows with an NA in them
+         mutate(sharing = ifelse(sharing %in% "Posting in existing, visible and publicly accessible repositories, with no user registration needed",
+                                 "Posting in existing, visible and publicly accessible repositories, with no user registration needed.",
+                                 sharing))
 
+### 
 
+# data sharing dataframe
+rk_df <- qsdf %>% 
+         # select the columns I want to transform
+         select(decade_challenge, diff_find_data:project_limits_sharing) %>% 
+         rowid_to_column() %>% # make a unique id column
+         # make long dataframe
+         pivot_longer(cols = diff_find_data:project_limits_sharing, 
+                      names_to = "col_name", values_to = "risks") %>% 
+         #select(-col_name) %>%
+         drop_na() 
 
+### 
 
-
-
-
+# data advice dataframe
+da_df <- sdf %>% 
+         # columns to use for quantitative analysis
+         select(c(1, 12, 61, 92, 93:96)) %>% 
+         # rename columns
+         dplyr::rename(name_id_decade_action = Coluna1,
+                       decade_challenge = Coluna12,
+                       want_advice_sharing = Coluna63,
+                       agree_to_be_contacted = Coluna101,
+                       your_name = Coluna103,
+                       your_email = Coluna104,
+                       name_data_lead = Coluna105,
+                       email_data_lead = Coluna106) %>% 
+         # remove first two rows containing header info
+         slice(-(1:2)) %>% 
+         # only keep rows with a response in the want_advice_sharing column
+         filter(!is.na(want_advice_sharing))
+  
+  
 
 
 

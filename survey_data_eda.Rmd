@@ -1,36 +1,65 @@
 ---
 title: "Survey Data EDA"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 ---
 
-```{r setup, include=FALSE, echo=FALSE}
-library(tidyverse)
+```{r setup1, include=FALSE, echo=FALSE}
+library(tidyverse) ; library(kableExtra)
 
 source("survey_data_cleaning.R")
 # use qsdf dataframe
 ```
 
-How well was each Decade Challenge represented in survey responses? 
+```{r setup2, include=FALSE, echo=FALSE}
+stack_bars <- function(df, x, fill, palette, fill_name, ...){
+              ggplot(data = df) +
+              geom_bar(aes_string(x = x, fill = fill)) +
+              scale_fill_brewer(fill_name, palette = palette, na.value = "#323232") + 
+              theme_classic() + 
+              scale_x_discrete("Decade Challenge",
+                               limits = c("Challenge 1: Marine Pollution",
+                                          "Challenge 2: Protect and Restore Ecosystems",
+                                          "Challenge 3: Sustainable Blue Food",
+                                          "Challenge 4: Sustainable Ocean Economy",
+                                          "Challenge 5: Ocean-Climate Nexus",
+                                          "Challenge 6: Community Resilience",
+                                          "Challenge 7: Ocean Observations",
+                                          "Challenge 8: Digital Representation of the Ocean",
+                                          "Challenge 9: Capacity Development",
+                                          "Challenge 10: Behavior Change"),
+                               labels = function(x) str_wrap(x, width = 20)) +
+              theme(axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1))
+              }
+
+```
+
+
+## How well was each Decade Challenge represented in survey responses?  
 ```{r decade challenge, echo=FALSE}
 dc <- ggplot(data = qsdf) + geom_bar(aes(decade_challenge)) +
       xlab("Decade Challenge") + ylab("count of responses") + theme_classic() +
-      scale_x_discrete(limits = c("Challenge 1: Marine Pollution", 
+      scale_x_discrete(limits = c("Challenge 1: Marine Pollution",
                                   "Challenge 2: Protect and Restore Ecosystems",
                                   "Challenge 3: Sustainable Blue Food",
-                                  "Challenge 4: Sustainable Ocean Economy",          
+                                  "Challenge 4: Sustainable Ocean Economy",
                                   "Challenge 5: Ocean-Climate Nexus",
                                   "Challenge 6: Community Resilience",
                                   "Challenge 7: Ocean Observations",
                                   "Challenge 8: Digital Representation of the Ocean",
                                   "Challenge 9: Capacity Development",
-                                  "Challenge 10: Behavior Change")) +
+                                  "Challenge 10: Behavior Change"),
+                       labels = function(x) str_wrap(x, width = 20)) +
       theme(axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1))
   
 dc
 ```
+\newpage
 
-```{r , echo=FALSE}
+## Will a Decade Action collect new data or use existing data or both?  
+```{r new old data, echo=FALSE, out.width="8.5in", out.height="11in", fig.width=8.5, fig.height=11, figure.align="center"}
 new_old_data <- ggplot(data = qsdf) + 
                 geom_jitter(aes(collect_new_data, use_existing_data, 
                                 color = decade_challenge), width = 0.25, height = 0.25) +
@@ -45,8 +74,248 @@ new_old_data <- ggplot(data = qsdf) +
                                                  "Challenge 7: Ocean Observations",
                                                  "Challenge 8: Digital Representation of the Ocean",
                                                  "Challenge 9: Capacity Development",
-                                                 "Challenge 10: Behavior Change"))
+                                                 "Challenge 10: Behavior Change"),
+                                      labels = c("Challenge 1: \nMarine Pollution", 
+                                                 "Challenge 2: \nProtect and Restore Ecosystems",
+                                                 "Challenge 3: \nSustainable Blue Food",
+                                                 "Challenge 4: \nSustainable Ocean Economy",          
+                                                 "Challenge 5: \nOcean-Climate Nexus",
+                                                 "Challenge 6: \nCommunity Resilience",
+                                                 "Challenge 7: \nOcean Observations",
+                                                 "Challenge 8: \nDigital Representation of the Ocean",
+                                                 "Challenge 9: \nCapacity Development",
+                                                 "Challenge 10: \nBehavior Change")) 
 
 new_old_data
 ```
+\newpage
+
+## Which subject matter will this data cover?  
+```{r data subject1, echo=FALSE, out.extra='angle=90', out.width="8.5in", out.height="11in", fig.width=11, fig.height=8.5, figure.align="center"}
+rp <- ggplot(data = ds_df) + 
+      geom_bar(aes(x = data_subject, 
+                   fill = factor(decade_challenge, 
+                                 levels = c("Challenge 1: Marine Pollution", 
+                                            "Challenge 2: Protect and Restore Ecosystems",
+                                            "Challenge 3: Sustainable Blue Food",
+                                            "Challenge 4: Sustainable Ocean Economy",     
+                                            "Challenge 5: Ocean-Climate Nexus",
+                                            "Challenge 6: Community Resilience",
+                                            "Challenge 7: Ocean Observations",
+                                            "Challenge 8: Digital Representation of the Ocean",
+                                            "Challenge 9: Capacity Development",
+                                            "Challenge 10: Behavior Change"))), 
+               width = 1) + 
+      coord_polar() + xlab("Data Subject") + 
+      scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +
+      scale_fill_viridis_d("Decade Challenge",
+                           limits = c("Challenge 1: Marine Pollution", 
+                                      "Challenge 2: Protect and Restore Ecosystems",
+                                      "Challenge 3: Sustainable Blue Food",
+                                      "Challenge 4: Sustainable Ocean Economy",          
+                                      "Challenge 5: Ocean-Climate Nexus",
+                                      "Challenge 6: Community Resilience",
+                                      "Challenge 7: Ocean Observations",
+                                      "Challenge 8: Digital Representation of the Ocean",
+                                      "Challenge 9: Capacity Development",
+                                      "Challenge 10: Behavior Change"),
+                           labels = c("Challenge 1: \nMarine Pollution", 
+                                      "Challenge 2: \nProtect and Restore Ecosystems",
+                                      "Challenge 3: \nSustainable Blue Food",
+                                      "Challenge 4: \nSustainable Ocean Economy",          
+                                      "Challenge 5: \nOcean-Climate Nexus",
+                                      "Challenge 6: \nCommunity Resilience",
+                                      "Challenge 7: \nOcean Observations",
+                                      "Challenge 8: \nDigital Representation of the Ocean",
+                                      "Challenge 9: \nCapacity Development",
+                                      "Challenge 10: \nBehavior Change")) +
+      theme(legend.key.height = unit(1, "cm"),
+            plot.margin = margin(8,8,8,8, unit = "pt"))
+rp
+```
+\newpage
+
+```{r data subject2, echo=FALSE, out.extra='angle=90', out.width="8.5in", out.height="11in", fig.width=11, fig.height=8.5, figure.align="center"}
+rd <- ggplot(data = ds_df) + 
+      geom_bar(aes(x = decade_challenge, fill = factor(data_subject))) + 
+      coord_polar() + xlab("Decade Challenge") + 
+      scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +
+      scale_fill_viridis_d("Data Subject",
+                           limits = c("(Bio)chemical oceanography",
+                                      "Biological oceanography",
+                                      "Coastal & offshore development",
+                                      "Conservation & restoration",
+                                      "Fisheries & aquaculture",
+                                      "Geology", "Hydrography",
+                                      "Marine litter & debris",
+                                      "Meteorological", "Oil & gas",
+                                      "Physical oceanography",
+                                      "Pollution & contaminants",
+                                      "Shipping", "Society & economy"),
+                           labels = c("(Bio)chemical \noceanography",
+                                      "Biological \noceanography",
+                                      "Coastal & offshore \ndevelopment",
+                                      "Conservation & \nrestoration",
+                                      "Fisheries & \naquaculture",
+                                      "Geology", "Hydrography",
+                                      "Marine litter\n & debris",
+                                      "Meteorological", "Oil & gas",
+                                      "Physical \noceanography",
+                                      "Pollution & \ncontaminants",
+                                      "Shipping", "Society & economy")) +
+      theme(legend.key.height = unit(1, "cm"),
+            plot.margin = margin(8,8,8,8, unit = "pt"))
+rd
+```
+
+
+## Will this work create new products and will those products support decision making?  
+```{r products, echo=FALSE, out.width="8.5in", out.height="11in", fig.width=8.5, fig.height=11, figure.align="center"}
+prod_dec <- ggplot(data = qsdf) + 
+            geom_jitter(aes(create_products, support_decision_process, 
+                            color = decade_challenge), width = 0.25, height = 0.25) +
+            theme_bw() + 
+            scale_color_viridis_d("Decade Challenge", option = "magma",
+                                  limits = c("Challenge 1: Marine Pollution", 
+                                             "Challenge 2: Protect and Restore Ecosystems",
+                                             "Challenge 3: Sustainable Blue Food",
+                                             "Challenge 4: Sustainable Ocean Economy",                                                      "Challenge 5: Ocean-Climate Nexus",
+                                             "Challenge 6: Community Resilience",
+                                             "Challenge 7: Ocean Observations",
+                                             "Challenge 8: Digital Representation of the Ocean",
+                                             "Challenge 9: Capacity Development",
+                                             "Challenge 10: Behavior Change"),
+                                  labels = c("Challenge 1: \nMarine Pollution", 
+                                      "Challenge 2: \nProtect and Restore Ecosystems",
+                                      "Challenge 3: \nSustainable Blue Food",
+                                      "Challenge 4: \nSustainable Ocean Economy",          
+                                      "Challenge 5: \nOcean-Climate Nexus",
+                                      "Challenge 6: \nCommunity Resilience",
+                                      "Challenge 7: \nOcean Observations",
+                                      "Challenge 8: \nDigital Representation of the Ocean",
+                                      "Challenge 9: \nCapacity Development",
+                                      "Challenge 10: \nBehavior Change")) 
+
+prod_dec
+```
+\newpage
+
+## Do you have a data management plan to address the Decade Challenge?  
+```{r data mgmt, echo=FALSE}
+dmp <- stack_bars(df = na.omit(qsdf[,c(1,21)]), x = "decade_challenge", 
+                  fill = "data_mgmt_plan", palette = "YlGnBu",
+                  fill_name = "Data Management \nPlan")
+
+dmp
+```
+\newpage
+
+## Since you're without a data managment plan right now, will you use an existing plan?  
+```{r no data mgmt plan, echo=FALSE}
+no_dmp <- ggplot(data = na.omit(qsdf[,c(1,22)])) +
+          geom_bar(aes(x = decade_challenge, 
+                       fill = factor(no_dmp_use_existing_plan))) +
+              scale_fill_brewer("Use existing \ndata mgmt \nplan", palette = "YlGnBu") + 
+              theme_classic() + 
+              scale_x_discrete("Decade Challenge",
+                               limits = c("Challenge 1: Marine Pollution",
+                                          "Challenge 2: Protect and Restore Ecosystems",
+                                          "Challenge 3: Sustainable Blue Food",
+                                          "Challenge 4: Sustainable Ocean Economy",
+                                          "Challenge 5: Ocean-Climate Nexus",
+                                          "Challenge 6: Community Resilience",
+                                          "Challenge 7: Ocean Observations",
+                                          "Challenge 8: Digital Representation of the Ocean",
+                                          "Challenge 9: Capacity Development",
+                                          "Challenge 10: Behavior Change"),
+                               labels = function(x) str_wrap(x, width = 20)) +
+              theme(axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1))
+  
+no_dmp
+```
+\newpage
+
+## How do you plan to address data sharing? 
+```{r data sharing, echo=FALSE, out.width="8.5in", out.height="11in", fig.width=8.5, fig.height=11, figure.align="center"}
+share <- ggplot(data = sh_df) +
+         geom_bar(aes(x = sharing, 
+                      fill = factor(decade_challenge, 
+                                    levels = c("Challenge 1: Marine Pollution", 
+                                               "Challenge 2: Protect and Restore Ecosystems",
+                                               "Challenge 3: Sustainable Blue Food",
+                                               "Challenge 4: Sustainable Ocean Economy",
+                                               "Challenge 5: Ocean-Climate Nexus",
+                                               "Challenge 6: Community Resilience",
+                                               "Challenge 7: Ocean Observations",
+                                               "Challenge 8: Digital Representation of the Ocean",
+                                               "Challenge 9: Capacity Development",
+                                               "Challenge 10: Behavior Change")))) +
+         scale_x_discrete("Data Sharing", labels = function(x) str_wrap(x, width = 30)) +
+         scale_fill_viridis_d("Decade Challenge",
+                           limits = c("Challenge 1: Marine Pollution", 
+                                      "Challenge 2: Protect and Restore Ecosystems",
+                                      "Challenge 3: Sustainable Blue Food",
+                                      "Challenge 4: Sustainable Ocean Economy",          
+                                      "Challenge 5: Ocean-Climate Nexus",
+                                      "Challenge 6: Community Resilience",
+                                      "Challenge 7: Ocean Observations",
+                                      "Challenge 8: Digital Representation of the Ocean",
+                                      "Challenge 9: Capacity Development",
+                                      "Challenge 10: Behavior Change"),
+                           labels = c("Challenge 1: \nMarine Pollution", 
+                                      "Challenge 2: \nProtect and Restore Ecosystems",
+                                      "Challenge 3: \nSustainable Blue Food",
+                                      "Challenge 4: \nSustainable Ocean Economy",          
+                                      "Challenge 5: \nOcean-Climate Nexus",
+                                      "Challenge 6: \nCommunity Resilience",
+                                      "Challenge 7: \nOcean Observations",
+                                      "Challenge 8: \nDigital Representation of the Ocean",
+                                      "Challenge 9: \nCapacity Development",
+                                      "Challenge 10: \nBehavior Change")) +
+         coord_flip()
+  
+share
+```
+\newpage
+
+## Risk factors for data use/reuse
+```{r data use/reuse, echo=FALSE}
+r1 <- ggplot(data = rk_df) + 
+      geom_bar(aes(x = col_name, fill = factor(risks, levels = c("High", "Medium", "Low")))) + 
+      theme_classic() + 
+      scale_x_discrete("Risk Type",
+                       limits = c("diff_find_data", "unkn_data_availability",
+                                  "lack_funding", "lack_human_capacity",
+                                  "project_limits_sharing"),
+                       labels = c("Difficulty \nfinding \ndata", 
+                                  "Unknown \ndata \navailability",
+                                  "Lack of \nfunding",
+                                  "Lack of \nhuman \ncapacity",
+                                  "Project \nlimits \nsharing")) + 
+      scale_fill_viridis_d("Risk Level", option = "rocket", #begin = , end = ,
+                           limits = c("High", "Medium", "Low"))
+r1  
+```
+\newpage
+
+## Who would like advice on data sharing? 
+```{r advice, echo=FALSE}
+tb <- kable(da_df) %>% 
+      kable_styling(font_size = 9) %>%
+      landscape()
+  
+      # DT::datatable(da_df, options = list(scrollX = TRUE))
+
+tb
+```
+
+
+
+<!-- , out.extra='angle=90', out.width="8.5in", out.height="11in", fig.width=11, fig.height=8.5, figure.align="center" -->
+
+
+
+
+
+
 
