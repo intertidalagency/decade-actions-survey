@@ -4,7 +4,7 @@
 #####################################################
 
 # load packages
-library(tidyverse)
+library(tidyverse) 
 
 # source the data download and read script
 source("survey_data_download.R")
@@ -110,18 +110,18 @@ da_df <- sdf %>%
          # columns to use for quantitative analysis
          select(c(1, 12, 61, 92, 93:96)) %>% 
          # rename columns
-         dplyr::rename(name_id_decade_action = Coluna1,
-                       decade_challenge = Coluna12,
-                       want_advice_sharing = Coluna63,
-                       agree_to_be_contacted = Coluna101,
+         dplyr::rename(`name_id decade_action` = Coluna1,
+                       `decade challenge` = Coluna12,
+                       `want_advice sharing` = Coluna63,
+                       `agree to_be contacted` = Coluna101,
                        your_name = Coluna103,
                        your_email = Coluna104,
-                       name_data_lead = Coluna105,
-                       email_data_lead = Coluna106) %>% 
+                       `name_data lead` = Coluna105,
+                       `email_data lead` = Coluna106) %>% 
          # remove first two rows containing header info
          slice(-(1:2)) %>% 
-         # only keep rows with a response in the want_advice_sharing column
-         filter(!is.na(want_advice_sharing))
+         # only keep rows with a response in the `want_advice sharing` column
+         filter(!is.na(`want_advice sharing`))
   
   
 

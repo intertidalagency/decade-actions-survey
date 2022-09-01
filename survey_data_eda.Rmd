@@ -3,11 +3,12 @@ title: "Survey Data EDA"
 output:
   pdf_document: default
   html_document: default
+classoption: landscape
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 ---
 
 ```{r setup1, include=FALSE, echo=FALSE}
-library(tidyverse) ; library(kableExtra)
+library(tidyverse) ; library(kableExtra) ; library(pander)
 
 source("survey_data_cleaning.R")
 # use qsdf dataframe
@@ -56,10 +57,10 @@ dc <- ggplot(data = qsdf) + geom_bar(aes(decade_challenge)) +
   
 dc
 ```
-\newpage
+
 
 ## Will a Decade Action collect new data or use existing data or both?  
-```{r new old data, echo=FALSE, out.width="8.5in", out.height="11in", fig.width=8.5, fig.height=11, figure.align="center"}
+```{r new old data, echo=FALSE}
 new_old_data <- ggplot(data = qsdf) + 
                 geom_jitter(aes(collect_new_data, use_existing_data, 
                                 color = decade_challenge), width = 0.25, height = 0.25) +
@@ -88,10 +89,10 @@ new_old_data <- ggplot(data = qsdf) +
 
 new_old_data
 ```
-\newpage
+
 
 ## Which subject matter will this data cover?  
-```{r data subject1, echo=FALSE, out.extra='angle=90', out.width="8.5in", out.height="11in", fig.width=11, fig.height=8.5, figure.align="center"}
+```{r data subject1, echo=FALSE, out.extra='angle=0', out.width="8.5in", out.height="11in", fig.width=11, fig.height=8.5, figure.align="center"}
 rp <- ggplot(data = ds_df) + 
       geom_bar(aes(x = data_subject, 
                    fill = factor(decade_challenge, 
@@ -135,7 +136,7 @@ rp
 ```
 \newpage
 
-```{r data subject2, echo=FALSE, out.extra='angle=90', out.width="8.5in", out.height="11in", fig.width=11, fig.height=8.5, figure.align="center"}
+```{r data subject2, echo=FALSE, out.extra='angle=0', out.width="8.5in", out.height="11in", fig.width=11, fig.height=8.5, figure.align="center"}
 rd <- ggplot(data = ds_df) + 
       geom_bar(aes(x = decade_challenge, fill = factor(data_subject))) + 
       coord_polar() + xlab("Decade Challenge") + 
@@ -170,7 +171,7 @@ rd
 
 
 ## Will this work create new products and will those products support decision making?  
-```{r products, echo=FALSE, out.width="8.5in", out.height="11in", fig.width=8.5, fig.height=11, figure.align="center"}
+```{r products, echo=FALSE}
 prod_dec <- ggplot(data = qsdf) + 
             geom_jitter(aes(create_products, support_decision_process, 
                             color = decade_challenge), width = 0.25, height = 0.25) +
@@ -204,7 +205,7 @@ prod_dec
 ```{r data mgmt, echo=FALSE}
 dmp <- stack_bars(df = na.omit(qsdf[,c(1,21)]), x = "decade_challenge", 
                   fill = "data_mgmt_plan", palette = "YlGnBu",
-                  fill_name = "Data Management \nPlan")
+                  fill_name = "Data \nManagement \nPlan")
 
 dmp
 ```
@@ -233,10 +234,10 @@ no_dmp <- ggplot(data = na.omit(qsdf[,c(1,22)])) +
   
 no_dmp
 ```
-\newpage
+
 
 ## How do you plan to address data sharing? 
-```{r data sharing, echo=FALSE, out.width="8.5in", out.height="11in", fig.width=8.5, fig.height=11, figure.align="center"}
+```{r data sharing, echo=FALSE, out.extra='angle=0', out.width="8.5in", out.height="11in", fig.width=11, fig.height=8.5, figure.align="center"}
 share <- ggplot(data = sh_df) +
          geom_bar(aes(x = sharing, 
                       fill = factor(decade_challenge, 
@@ -300,9 +301,14 @@ r1
 
 ## Who would like advice on data sharing? 
 ```{r advice, echo=FALSE}
-tb <- kable(da_df) %>% 
-      kable_styling(font_size = 9) %>%
-      landscape()
+panderOptions('table.split.table', Inf)
+
+tb <- pander(da_df, style = 'multiline')
+      
+      
+      # kable(da_df, format = "latex") %>% 
+      # kable_styling(font_size = 8, latex_options = "scale_down") #%>%
+      # kableExtra::landscape()
   
       # DT::datatable(da_df, options = list(scrollX = TRUE))
 
@@ -311,7 +317,12 @@ tb
 
 
 
-<!-- , out.extra='angle=90', out.width="8.5in", out.height="11in", fig.width=11, fig.height=8.5, figure.align="center" -->
+<!-- 
+, out.extra='angle=90', out.width="8.5in", out.height="11in", fig.width=11, fig.height=8.5, figure.align="center" 
+
+out.width="8.5in", out.height="11in", fig.width=7.5, fig.height=8, figure.align="center"
+
+-->
 
 
 
