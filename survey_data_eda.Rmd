@@ -1,5 +1,5 @@
 ---
-title: "Survey Data EDA"
+title: "Exploratory Data Visualization for Decade Data Survey"
 output:
   pdf_document: default
   html_document: default
@@ -8,18 +8,18 @@ date: "`r format(Sys.time(), '%d %B, %Y')`"
 ---
 
 ```{r setup1, include=FALSE, echo=FALSE}
-library(tidyverse) ; library(kableExtra) ; library(pander)
+library(tidyverse) ; library(kableExtra) ; library(pander) ; library(viridis)
 
 source("survey_data_cleaning.R")
-# use qsdf dataframe
 ```
 
-```{r setup2, include=FALSE, echo=FALSE}
-stack_bars <- function(df, x, fill, palette, fill_name, ...){
+```{r setup2, include=FALSE, echo=FALSE, eval = FALSE}
+# a plotting function for stacked bars
+stack_bars <- function(df, x, fill, levels, xlab, palette, fill_name, ...){
               ggplot(data = df) +
-              geom_bar(aes_string(x = x, fill = fill)) +
-              scale_fill_brewer(fill_name, palette = palette, na.value = "#323232") + 
-              theme_classic() + 
+              geom_bar(aes_string(x = factor(x, levels = levels), 
+                                  fill = factor(fill, levels = levels))) +
+              xlab + theme_classic() + 
               scale_x_discrete("Decade Challenge",
                                limits = c("Challenge 1: Marine Pollution",
                                           "Challenge 2: Protect and Restore Ecosystems",
@@ -35,10 +35,50 @@ stack_bars <- function(df, x, fill, palette, fill_name, ...){
               theme(axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1))
               }
 
+
+     # ggplot()  + 
+     #             geom_bar(aes(x = factor(support_decision_process, 
+     #                                   levels = c("Yes", "No", NA)),
+     #                        fill = factor(support_decision_process, 
+     #                                      levels = c("Yes", "No", NA)))) +
+     #             xlab("Will your products support decision making?")  + 
+     #             scale_fill_viridis_d(option = "magma", na.value = "gray", 
+     #                             begin = 0.2, end = 0.7, guide = "none")  +   
+     #             theme_bw() 
+     # 
+
+
 ```
 
+Preamble: The purpose of this survey is to gather information about the data and
+information aspects of all endorsed Decade Actions. The results will enable the
+Ocean Decade Coordination Unit (DCU) and the Data Coordination Group (DCG) to:
+(i) map data collected against Decade challenges;
+(ii) identify data subject areas against Decade challenges;
+(iii) identify expected data products and information products.
 
-## How well was each Decade Challenge represented in survey responses?  
+Definitions used:
+“Data”: Data is a set of values, symbols or signs (recorded on any type of medium) that represent one or more properties of an entity. (source: Implementation Plan Ocean Decade)
+
+“Information”: Information is the result obtained after processing, interpreting, and
+organizing facts/data (recorded on any type of medium): Examples are scientific
+reports or publications, videos, maps, trend analyses, etc.
+
+“Data and Information Strategy”: A definition and documentation of the objectives
+and actions needed to transition a data and information system into a desired future
+state.
+
+“Data and Information Management Plan”: A definition and documentation of the
+processes and methods objectives and actions needed to handle data and
+information for a set of purposes.
+
+If you have any questions about this survey, please contact Louis Demargne
+(l.demargne@unesco.org) and Peter Pissierssens (p.pissierssens@unesco.org)
+
+### NOTE: These visualizations only include complete survey responses at this time.  Also, open-ended responses (free text, etc.) are not included in this analysis.  
+  
+\newpage 
+## 2. Please indicate to which Decade Challenge your action relates to (select only 1 from list below)
 ```{r decade challenge, echo=FALSE}
 dc <- ggplot(data = qsdf) + geom_bar(aes(decade_challenge)) +
       xlab("Decade Challenge") + ylab("count of responses") + theme_classic() +
@@ -57,17 +97,17 @@ dc <- ggplot(data = qsdf) + geom_bar(aes(decade_challenge)) +
   
 dc
 ```
+\newpage 
 
-
-## Will a Decade Action collect new data or use existing data or both?  
-```{r new old data, echo=FALSE}
+## 3. For the Challenge identified above, will your Decade Action collect new data?  use existing data?
+```{r new old data, echo=FALSE, warning=FALSE, fig.width=10, fig.height=6}
 new_old_data <- ggplot(data = qsdf) + 
                 geom_jitter(aes(collect_new_data, use_existing_data, 
                                 color = decade_challenge), width = 0.25, height = 0.25) +
                 theme_bw() + 
                 scale_color_viridis_d("Decade Challenge",
                                       limits = c("Challenge 1: Marine Pollution", 
-                                                 "Challenge 2: Protect and Restore Ecosystems",
+                                                 "Challenge 2: Protect and Restore \nEcosystems",
                                                  "Challenge 3: Sustainable Blue Food",
                                                  "Challenge 4: Sustainable Ocean Economy",          
                                                  "Challenge 5: Ocean-Climate Nexus",
@@ -79,19 +119,34 @@ new_old_data <- ggplot(data = qsdf) +
                                       labels = c("Challenge 1: \nMarine Pollution", 
                                                  "Challenge 2: \nProtect and Restore Ecosystems",
                                                  "Challenge 3: \nSustainable Blue Food",
-                                                 "Challenge 4: \nSustainable Ocean Economy",          
+                                                 "Challenge 4: \nSustainable Ocean \nEconomy",          
                                                  "Challenge 5: \nOcean-Climate Nexus",
                                                  "Challenge 6: \nCommunity Resilience",
                                                  "Challenge 7: \nOcean Observations",
-                                                 "Challenge 8: \nDigital Representation of the Ocean",
+                                                 "Challenge 8: \nDigital Representation \nof the Ocean",
                                                  "Challenge 9: \nCapacity Development",
-                                                 "Challenge 10: \nBehavior Change")) 
+                                                 "Challenge 10: \nBehavior Change")) + 
+                theme(legend.key.height = unit(1, "cm"))
 
 new_old_data
 ```
+Note: Points are jittered for better visualization. Distance from the grid intersection has no meaning.    
+\newpage
 
+### Which six Decade Actions are not using existing data?
+```{r no data, echo=FALSE}
+ed <- nd_df %>% 
+      filter(use_existing_data == "No") 
 
-## Which subject matter will this data cover?  
+panderOptions('table.split.table', Inf)
+
+ed_tb <- pander(ed, style = 'multiline')
+
+ed_tb
+```
+ 
+
+## 4. Since you have responded ‘yes’ to either or both of the previous points, please indicate which subject area(s) these data pertain to: 
 ```{r data subject1, echo=FALSE, out.extra='angle=0', out.width="8.5in", out.height="11in", fig.width=11, fig.height=8.5, figure.align="center"}
 rp <- ggplot(data = ds_df) + 
       geom_bar(aes(x = data_subject, 
@@ -134,9 +189,10 @@ rp <- ggplot(data = ds_df) +
             plot.margin = margin(8,8,8,8, unit = "pt"))
 rp
 ```
-\newpage
 
-```{r data subject2, echo=FALSE, out.extra='angle=0', out.width="8.5in", out.height="11in", fig.width=11, fig.height=8.5, figure.align="center"}
+
+### Another way to visualize the responses from question 4.
+```{r data subject2, echo=FALSE, out.extra='angle=0', out.width="8.5in", out.height="11in", fig.width=11, fig.height=7.5, figure.align="center"}
 rd <- ggplot(data = ds_df) + 
       geom_bar(aes(x = decade_challenge, fill = factor(data_subject))) + 
       coord_polar() + xlab("Decade Challenge") + 
@@ -168,75 +224,127 @@ rd <- ggplot(data = ds_df) +
             plot.margin = margin(8,8,8,8, unit = "pt"))
 rd
 ```
+  
+Note: Axis is the count of responses.  Gaps in this plot show where respondents did not check a given data subject in the survey.  
 
-
-## Will this work create new products and will those products support decision making?  
-```{r products, echo=FALSE}
+ 
+```{r separate products, echo=FALSE, eval = FALSE}
 prod_dec <- ggplot(data = qsdf) + 
-            geom_jitter(aes(create_products, support_decision_process, 
-                            color = decade_challenge), width = 0.25, height = 0.25) +
-            theme_bw() + 
-            scale_color_viridis_d("Decade Challenge", option = "magma",
-                                  limits = c("Challenge 1: Marine Pollution", 
-                                             "Challenge 2: Protect and Restore Ecosystems",
-                                             "Challenge 3: Sustainable Blue Food",
-                                             "Challenge 4: Sustainable Ocean Economy",                                                      "Challenge 5: Ocean-Climate Nexus",
-                                             "Challenge 6: Community Resilience",
-                                             "Challenge 7: Ocean Observations",
-                                             "Challenge 8: Digital Representation of the Ocean",
-                                             "Challenge 9: Capacity Development",
-                                             "Challenge 10: Behavior Change"),
-                                  labels = c("Challenge 1: \nMarine Pollution", 
-                                      "Challenge 2: \nProtect and Restore Ecosystems",
-                                      "Challenge 3: \nSustainable Blue Food",
-                                      "Challenge 4: \nSustainable Ocean Economy",          
-                                      "Challenge 5: \nOcean-Climate Nexus",
-                                      "Challenge 6: \nCommunity Resilience",
-                                      "Challenge 7: \nOcean Observations",
-                                      "Challenge 8: \nDigital Representation of the Ocean",
-                                      "Challenge 9: \nCapacity Development",
-                                      "Challenge 10: \nBehavior Change")) 
+            geom_bar(aes(x = factor(create_products, levels = c("Yes", "No", NA)),
+                         fill = factor(create_products, levels = c("Yes", "No", NA)))) +
+            xlab("5. Are you generating products or services?") +
+            scale_fill_viridis_d(option = "magma", na.value = "gray", 
+                                 begin = 0.2, end = 0.7, guide = "none") +  
+            theme_bw() 
+ 
+#prod_dec
 
-prod_dec
+specific_prod <- qsdf %>% 
+                 filter(create_products == "Yes") %>% 
+                 ggplot()  + 
+                 geom_bar(aes(x = factor(support_decision_process, 
+                                       levels = c("Yes", "No", NA)),
+                              fill = factor(support_decision_process, 
+                                            levels = c("Yes", "No", NA)))) +
+                 xlab("6. Will your products support decision making?")  + 
+                 scale_fill_viridis_d(option = "magma", na.value = "gray", 
+                                 begin = 0.2, end = 0.7, guide = "none")  +   
+                 theme_bw() 
+  
+
+#specific_prod  
+```
+
+## 5. Are you going to generate data/information products and/or services from that data?
+## 6. Since you have responded ‘yes’ to the previous question, have you identified specific decision makers or decision making processes that these products will support?
+```{r together products, echo=FALSE}
+prod_and_spec <- qsdf %>% select(create_products, support_decision_process) %>% 
+                 rownames_to_column("id") %>%
+                 pivot_longer(!id) %>% 
+                 ggplot() + theme_bw() +
+                 geom_bar(aes(x = name, 
+                              fill = factor(value, levels = c("Yes", "No", NA))),
+                          position = position_stack(reverse = TRUE)
+                          ) +
+                 xlab("") +
+                 scale_fill_viridis_d("Response",
+                                      option = "magma", na.value = "gray", 
+                                      begin = 0.2, end = 0.7,
+                                      guide = guide_legend(reverse = TRUE)) +
+                 scale_x_discrete(labels = c("Question 5.", 
+                                             "Question 6."))
+
+prod_and_spec
 ```
 \newpage
 
-## Do you have a data management plan to address the Decade Challenge?  
-```{r data mgmt, echo=FALSE}
-dmp <- stack_bars(df = na.omit(qsdf[,c(1,21)]), x = "decade_challenge", 
-                  fill = "data_mgmt_plan", palette = "YlGnBu",
-                  fill_name = "Data \nManagement \nPlan")
-
+## 7. Have you developed a data & information management strategy and/or plan to address the Decade Challenge you have identified above? 
+```{r data mgmt, echo=FALSE, fig.width=10, fig.height=6}
+dmp <- qsdf %>% 
+       select(c(1,21)) %>% na.omit() %>% 
+       ggplot() + theme_classic() +
+       geom_bar(aes(x = decade_challenge, 
+                    fill = factor(data_mgmt_plan, 
+                                  levels = c("Yes", "In Progress", "Not Yet", "No"))),
+                position = position_stack(reverse = TRUE)
+                ) +
+       scale_fill_viridis_d("Do you have \na Data \nManagement \nPlan?",
+                            option = "magma", na.value = "gray", 
+                            begin = 0.2, end = 0.7,
+                            guide = guide_legend(reverse = TRUE)
+                            ) +
+       scale_x_discrete("Decade Challenge",
+                        limits = c("Challenge 1: Marine Pollution",
+                                   "Challenge 2: Protect and Restore Ecosystems",
+                                   "Challenge 3: Sustainable Blue Food",
+                                   "Challenge 4: Sustainable Ocean Economy",
+                                   "Challenge 5: Ocean-Climate Nexus",
+                                   "Challenge 6: Community Resilience",
+                                   "Challenge 7: Ocean Observations",
+                                   "Challenge 8: Digital Representation of the Ocean",
+                                   "Challenge 9: Capacity Development",
+                                   "Challenge 10: Behavior Change"),
+                        labels = function(x) str_wrap(x, width = 20)) +
+       theme(axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1))
+  
 dmp
 ```
 \newpage
 
-## Since you're without a data managment plan right now, will you use an existing plan?  
-```{r no data mgmt plan, echo=FALSE}
-no_dmp <- ggplot(data = na.omit(qsdf[,c(1,22)])) +
+## 8. Since you have responded ‘no’ or ‘not yet’ to the previous question, will you be using an existing data & information management strategy and/or plan ? 
+```{r no data mgmt plan, echo=FALSE, fig.width=10, fig.height=6}
+no_dmp <- qsdf %>% 
+          select(c(1, 21, 22)) %>% #na.omit() %>%
+          filter(data_mgmt_plan %in% c("No", "Not Yet")) %>% 
+          ggplot() + theme_classic() +
           geom_bar(aes(x = decade_challenge, 
-                       fill = factor(no_dmp_use_existing_plan))) +
-              scale_fill_brewer("Use existing \ndata mgmt \nplan", palette = "YlGnBu") + 
-              theme_classic() + 
-              scale_x_discrete("Decade Challenge",
-                               limits = c("Challenge 1: Marine Pollution",
-                                          "Challenge 2: Protect and Restore Ecosystems",
-                                          "Challenge 3: Sustainable Blue Food",
-                                          "Challenge 4: Sustainable Ocean Economy",
-                                          "Challenge 5: Ocean-Climate Nexus",
-                                          "Challenge 6: Community Resilience",
-                                          "Challenge 7: Ocean Observations",
-                                          "Challenge 8: Digital Representation of the Ocean",
-                                          "Challenge 9: Capacity Development",
-                                          "Challenge 10: Behavior Change"),
-                               labels = function(x) str_wrap(x, width = 20)) +
-              theme(axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1))
+                       fill = factor(no_dmp_use_existing_plan,
+                                     levels = c("Yes", "No", "Not Sure/Don't Know"))),
+                   position = position_stack(reverse = TRUE)) +
+          scale_fill_viridis_d("Your previous \nresponse was \nno/not yet; \nwill you be using \nan existing plan?",
+                               option = "magma", na.value = "gray", 
+                               begin = 0.2, end = 0.7,
+                               guide = guide_legend(reverse = TRUE)
+                               ) +
+          scale_x_discrete("Decade Challenge",
+                           limits = c("Challenge 1: Marine Pollution",
+                                      "Challenge 2: Protect and Restore Ecosystems",
+                                      "Challenge 3: Sustainable Blue Food",
+                                      "Challenge 4: Sustainable Ocean Economy",
+                                      "Challenge 5: Ocean-Climate Nexus",
+                                      "Challenge 6: Community Resilience",
+                                      "Challenge 7: Ocean Observations",
+                                      "Challenge 8: Digital Representation of the Ocean",
+                                      "Challenge 9: Capacity Development",
+                                      "Challenge 10: Behavior Change"),
+                           labels = function(x) str_wrap(x, width = 20)) +
+          theme(axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1))
   
 no_dmp
 ```
 
 
-## How do you plan to address data sharing? 
+## 11. The Ocean Decade Implementation Plan calls for data to be shared widely, openly, and freely, as much as possible and appropriate. How do you plan to address this with your data and information (and any products derived from them)? [check all that apply]
 ```{r data sharing, echo=FALSE, out.extra='angle=0', out.width="8.5in", out.height="11in", fig.width=11, fig.height=8.5, figure.align="center"}
 share <- ggplot(data = sh_df) +
          geom_bar(aes(x = sharing, 
@@ -279,8 +387,8 @@ share
 ```
 \newpage
 
-## Risk factors for data use/reuse
-```{r data use/reuse, echo=FALSE}
+## 12. Which of these issues do you anticipate being factors / risks in your use of data & information (rate as low/medium/high) that could negatively impact the success of your Decade Action
+```{r data use/reuse, echo=FALSE, fig.width=10, fig.height=6}
 r1 <- ggplot(data = rk_df) + 
       geom_bar(aes(x = col_name, fill = factor(risks, levels = c("High", "Medium", "Low")))) + 
       theme_classic() + 
@@ -289,22 +397,46 @@ r1 <- ggplot(data = rk_df) +
                                   "lack_funding", "lack_human_capacity",
                                   "project_limits_sharing"),
                        labels = c("Difficulty \nfinding \ndata", 
-                                  "Unknown \ndata \navailability",
+                                  "No \nknowledge \nof data \navailability",
                                   "Lack of \nfunding",
                                   "Lack of \nhuman \ncapacity",
                                   "Project \nlimits \nsharing")) + 
-      scale_fill_viridis_d("Risk Level", option = "rocket", #begin = , end = ,
-                           limits = c("High", "Medium", "Low"))
+      scale_fill_viridis_d("Risk Level", option = "magma", na.value = "gray", 
+                           begin = 0.2, end = 0.7, limits = c("High", "Medium", "Low"))
+
 r1  
 ```
-\newpage
+  
+Note: "Lack of knowledge on data availability" was listed twice in Survey Monkey version of this question.  However, both columns in survey results were the same, so only one is shown here.  
 
-## Who would like advice on data sharing? 
-```{r advice, echo=FALSE}
+
+## 11. response == "Not sure / I would appreciate advice on this"
+## 15. Would you agree to us contacting you to provide further insights to shape the Ocean Decade data and information strategy?
+```{r advice numbers, echo=FALSE}
+adn <-  da_df %>% select(`want_advice sharing`, `agree to_be contacted`) %>% 
+        rownames_to_column("id") %>%
+        pivot_longer(!id) %>% 
+        mutate(value = ifelse(value == "Not sure / I would appreciate advice on this", 
+                              "Yes", value)) %>% 
+        ggplot() + theme_bw() +
+        geom_bar(aes(x = factor(name, 
+                                levels = c("want_advice sharing", "agree to_be contacted")), 
+                     fill = factor(value))) +
+        xlab("") +
+        scale_fill_viridis_d("Response",
+                             option = "magma", na.value = "gray", 
+                             begin = 0.2, end = 0.7) +
+        scale_x_discrete(labels = c("11. Would you \nappreciate advice \non data sharing?",
+                                    "15. Would you agree \nto us contacting \nyou to provide \nfurther insights?"))
+
+adn
+```
+
+
+```{r advice table, echo=FALSE, eval=FALSE}
 panderOptions('table.split.table', Inf)
 
 tb <- pander(da_df, style = 'multiline')
-      
       
       # kable(da_df, format = "latex") %>% 
       # kable_styling(font_size = 8, latex_options = "scale_down") #%>%
@@ -317,12 +449,6 @@ tb
 
 
 
-<!-- 
-, out.extra='angle=90', out.width="8.5in", out.height="11in", fig.width=11, fig.height=8.5, figure.align="center" 
-
-out.width="8.5in", out.height="11in", fig.width=7.5, fig.height=8, figure.align="center"
-
--->
 
 
 

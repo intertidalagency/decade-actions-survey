@@ -123,8 +123,26 @@ da_df <- sdf %>%
          # only keep rows with a response in the `want_advice sharing` column
          filter(!is.na(`want_advice sharing`))
   
-  
+###
 
+# new data old data dataframe  
+nd_df <- sdf %>% 
+         # columns to use for quantitative analysis
+         select(c(1, 12, 13:16)) %>% 
+         # rename columns
+         dplyr::rename(name_id_decade_action = Coluna1,
+                       decade_challenge = Coluna12,
+                       collect_new_data_yes = Coluna14,
+                       collect_new_data_no = Coluna15,
+                       use_existing_data_yes = Coluna16,
+                       use_existing_data_no = Coluna17) %>% 
+         # remove first two rows containing header info
+         slice(-(1:2)) %>% 
+         # consolidate 13 and 14, 15 and 16 to one column for each group
+         unite("collect_new_data", collect_new_data_yes:collect_new_data_no, 
+               na.rm = TRUE, remove = TRUE) %>% 
+         unite("use_existing_data", use_existing_data_yes:use_existing_data_no,
+               na.rm = TRUE, remove = TRUE)
 
 
 
